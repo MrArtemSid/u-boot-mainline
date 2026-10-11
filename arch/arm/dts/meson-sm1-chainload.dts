@@ -1,0 +1,17 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Control DTB of the SM1 chainload U-Boot (sm1_chainload_defconfig): the
+ * Amlogic AC2xx reference (sm1_ac213, which the stock firmware of most
+ * S905X3 boxes is built from) without board extras. U-Boot uses only the
+ * UART, the SD/eMMC controllers and USB here. The memory size is taken from
+ * BL2, not from this file.
+ */
+
+/dts-v1/;
+
+#include "meson-sm1-ac2xx.dtsi"
+
+/ {
+	compatible = "amlogic,sm1";
+	model = "Amlogic S905X3 (chainload)";
+};

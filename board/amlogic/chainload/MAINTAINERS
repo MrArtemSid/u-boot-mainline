@@ -1,0 +1,6 @@
+SM1 CHAINLOAD
+M:	Artem Sidorenko <artem.sid.key@gmail.com>
+S:	Maintained
+F:	arch/arm/dts/meson-sm1-chainload*
+F:	board/amlogic/chainload/
+F:	configs/sm1_chainload_defconfig

@@ -54,7 +54,8 @@ dtb-$(CONFIG_ARCH_S5P4418) += \
 	s5p4418-nanopi2.dtb
 
 dtb-$(CONFIG_ARCH_MESON) += \
-	meson-a1-ad401.dtb
+	meson-a1-ad401.dtb \
+	meson-sm1-chainload.dtb
 
 dtb-$(CONFIG_ARCH_TEGRA) += \
 	tegra20-acer-a500-picasso.dtb \
