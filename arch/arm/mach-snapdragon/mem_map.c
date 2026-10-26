@@ -111,6 +111,8 @@ static void configure_reserved_memory(void)
 	/* Collect the reserved memory regions and appropriate attrs */
 	fdt_for_each_subnode(rmem, gd->fdt_blob, parent) {
 		const fdt32_t *ptr;
+		const char *name;
+
 		attrs = PTE_TYPE_FAULT;
 		/* If the no-map property isn't set then the region is valid */
 		if (!fdt_getprop(gd->fdt_blob, rmem, "no-map", NULL))
@@ -119,6 +121,13 @@ static void configure_reserved_memory(void)
 		 * be marked valid too. */
 		if (fdt_getprop(gd->fdt_blob, rmem, "compatible", NULL))
 			attrs = PTE_TYPE_VALID | PTE_BLOCK_MEMTYPE(MT_NORMAL);
+		/* The bootloader splash framebuffer is still scanned out by the display
+		 * hardware, keep it accessible and uncached so CPU writes are visible.
+		 */
+		name = fdt_get_name(gd->fdt_blob, rmem, NULL);
+		if (name && (!strncmp(name, "cont-splash", 11) ||
+			     !strncmp(name, "framebuffer", 11)))
+			attrs = PTE_TYPE_VALID | PTE_BLOCK_MEMTYPE(MT_NORMAL_NC);
 
 		if (i == N_RESERVED_REGIONS) {
 			log_err("Too many reserved regions!\n");
@@ -216,7 +225,10 @@ void enable_caches(void)
 	 * reserved regions as inacessible (PTE_TYPE_FAULT)
 	 */
 	if (qcom_memmap_source == QCOM_MEMMAP_SOURCE_SMEM ||
-	    fdt_node_check_compatible(gd->fdt_blob, 0, "qcom,qcs404") == 0) {
+	    fdt_node_check_compatible(gd->fdt_blob, 0, "qcom,qcs404") == 0 ||
+	    fdt_node_check_compatible(gd->fdt_blob, 0, "qcom,msm8917") == 0 ||
+	    fdt_node_check_compatible(gd->fdt_blob, 0, "qcom,msm8937") == 0 ||
+	    fdt_node_check_compatible(gd->fdt_blob, 0, "qcom,msm8940") == 0) {
 		carveout_start = get_timer(0);
 		/* Takes ~20-50ms on SDM845 */
 		configure_reserved_memory();
