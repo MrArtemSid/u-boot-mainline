@@ -15,6 +15,14 @@ config CLK_QCOM_APQ8016
 	  on the Snapdragon APQ8016 SoC. This driver supports the clocks
 	  and resets exposed by the GCC hardware block.
 
+config CLK_QCOM_MSM8937
+	bool "Qualcomm MSM8917/MSM8937/MSM8940 GCC"
+	select CLK_QCOM
+	help
+	  Say Y here to enable support for the Global Clock Controller
+	  on the Snapdragon MSM8917, MSM8937 and MSM8940 SoCs. This driver
+	  supports the SDCC and USB HS clocks, resets and the MDSS GDSC.
+
 config CLK_QCOM_APQ8096
 	bool "Qualcomm APQ8096 GCC"
 	select CLK_QCOM
