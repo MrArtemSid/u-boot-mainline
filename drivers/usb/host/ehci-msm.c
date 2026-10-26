@@ -21,11 +21,40 @@
 #include <linux/compat.h>
 #include "ehci.h"
 
+/* Link-side configuration for PHYs not managed through the ULPI subnode */
+#define GENCONFIG_TXFIFO_IDLE_FORCE_DIS		BIT(4)
+#define GENCONFIG2_SESS_VLD_CTRL_EN		BIT(7)
+#define GENCONFIG2_ULPI_TX_PKT_EN_CLR_FIX	BIT(19)
+#define USBCMD_SESS_VLD_CTRL			BIT(25)
+
 struct msm_ehci_priv {
 	struct ehci_ctrl ctrl; /* Needed by EHCI */
 	struct usb_ehci *ehci; /* Start of IP core*/
 	struct phy phy;
+	bool ext_phy; /* PHY referenced by "phys", not a ULPI child node */
 };
+
+/*
+ * With a PHY outside of the ULPI subnode (e.g. the 28nm femto PHY on
+ * MSM8917/MSM8937) nobody else programs the link, so do what Linux
+ * ci_hdrc_msm does on CI_HDRC_CONTROLLER_RESET_EVENT. VBUS is not routed
+ * to the controller on these boards, so session valid is forced.
+ */
+static void msm_ehci_link_init(struct msm_ehci_priv *p)
+{
+	struct usb_ehci *ehci = p->ehci;
+
+	if (!p->ext_phy)
+		return;
+
+	writel(PORT_PTS_ULPI, &ehci->portsc);
+	writel(0x0, &ehci->sbuscfg);
+	writel(0x08, &ehci->sbusmode);
+	clrbits_le32(&ehci->genconfig, GENCONFIG_TXFIFO_IDLE_FORCE_DIS);
+	clrsetbits_le32(&ehci->genconfig2, GENCONFIG2_ULPI_TX_PKT_EN_CLR_FIX,
+			GENCONFIG2_SESS_VLD_CTRL_EN);
+	setbits_le32(&ehci->usbcmd, USBCMD_SESS_VLD_CTRL);
+}
 
 struct qcom_ci_hdrc_priv {
 	struct clk_bulk clks;
@@ -37,6 +66,7 @@ static int msm_init_after_reset(struct ehci_ctrl *dev)
 	struct usb_ehci *ehci = p->ehci;
 
 	generic_phy_reset(&p->phy);
+	msm_ehci_link_init(p);
 
 	/* set mode to host controller */
 	writel(CM_HOST, &ehci->usbmode);
@@ -102,6 +132,9 @@ static int ehci_usb_of_to_plat(struct udevice *dev)
 	if (!priv->ehci)
 		return -EINVAL;
 
+	priv->ext_phy = !ofnode_valid(dev_read_subnode(dev, "ulpi")) &&
+			dev_read_prop(dev, "phys", NULL);
+
 	return 0;
 }
 
@@ -114,6 +147,7 @@ void ci_init_after_reset(struct ehci_ctrl *ctrl)
 	struct msm_ehci_priv *p = ctrl->priv;
 
 	generic_phy_reset(&p->phy);
+	msm_ehci_link_init(p);
 }
 #endif
 
