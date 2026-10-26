@@ -9,12 +9,34 @@
 
 #include <clk-uclass.h>
 #include <dm.h>
+#include <dm/lists.h>
+#include <dm/read.h>
+
+static int nop_parent_bind(struct udevice *dev)
+{
+	ofnode edge;
+	int ret;
+
+	ret = dm_scan_fdt_dev(dev);
+	if (ret || !device_is_compatible(dev, "qcom,rpm-proc"))
+		return ret;
+
+	/* Older SMD RPM trees have a container without a compatible. */
+	edge = dev_read_subnode(dev, "smd-edge");
+	if (!ofnode_valid(edge) || !ofnode_is_enabled(edge) ||
+	    ofnode_read_prop(edge, "compatible", NULL))
+		return 0;
+
+	return device_bind_driver_to_node(dev, "nop_parent",
+					  ofnode_get_name(edge), edge, NULL);
+}
 
 /* NOP parent nodes to stub clocks */
 static const struct udevice_id nop_parent_ids[] = {
 	{ .compatible = "qcom,rpm-proc" },
 	{ .compatible = "qcom,glink-rpm" },
 	{ .compatible = "qcom,glink-smd-rpm" },
+	{ .compatible = "qcom,smd-rpm" },
 	{ }
 };
 
@@ -22,7 +44,7 @@ U_BOOT_DRIVER(nop_parent) = {
 	.name = "nop_parent",
 	.id = UCLASS_NOP,
 	.of_match = nop_parent_ids,
-	.bind = dm_scan_fdt_dev,
+	.bind = nop_parent_bind,
 	.flags = DM_FLAG_DEFAULT_PD_CTRL_OFF,
 };
 
