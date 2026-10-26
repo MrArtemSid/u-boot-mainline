@@ -39,5 +39,6 @@ static inline void qcom_configure_capsule_updates(void) {}
 #endif /* EFI_HAVE_CAPSULE_SUPPORT */
 
 int qcom_parse_memory(const void *fdt, bool fdt_is_internal);
+int qcom_lk2nd_fixup(void *fdt);
 
 #endif /* __QCOM_PRIV_H__ */

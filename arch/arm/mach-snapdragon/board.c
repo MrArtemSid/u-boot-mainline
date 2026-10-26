@@ -86,6 +86,13 @@ int board_fdt_blob_setup(void **fdtp)
 
 	internal_fdt = (struct fdt_header *)*fdtp;
 	external_fdt = (struct fdt_header *)get_prev_bl_fdt_addr();
+	if (external_fdt && !fdt_check_header(external_fdt)) {
+		int fixup_ret = qcom_lk2nd_fixup(external_fdt);
+
+		if (fixup_ret)
+			log_warning("Failed to normalize lk2nd framebuffer reservations: %d\n",
+				    fixup_ret);
+	}
 	external_valid = external_fdt && !fdt_check_header(external_fdt);
 	internal_valid = !fdt_check_header(internal_fdt);
 

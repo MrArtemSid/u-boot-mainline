@@ -8,7 +8,7 @@ obj-y += mem_map.o
 ifeq ($(CONFIG_SPL_BUILD),y)
 obj-y += board_spl.o
 else
-obj-y += board.o
+obj-y += board.o lk2nd_fixup.o
 obj-$(CONFIG_EFI_HAVE_CAPSULE_SUPPORT) += capsule_update.o
 endif
 
