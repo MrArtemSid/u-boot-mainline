@@ -22,6 +22,14 @@ config PINCTRL_QCOM_APQ8016
 	  Say Y here to enable support for pinctrl on the MSM8916 / APQ8016
 	  Snapdragon 410 SoC, as well as the associated GPIO driver.
 
+config PINCTRL_QCOM_MSM8917
+	bool "Qualcomm MSM8917/MSM8937/MSM8940 Pinctrl"
+	default y if PINCTRL_QCOM_GENERIC
+	select PINCTRL_QCOM
+	help
+	  Say Y here to enable support for pinctrl on the MSM8917, MSM8937
+	  and MSM8940 Snapdragon SoCs, as well as the associated GPIO driver.
+
 config PINCTRL_QCOM_APQ8096
 	bool "Qualcomm APQ8096 Pinctrl"
 	default y if PINCTRL_QCOM_GENERIC
