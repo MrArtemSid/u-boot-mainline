@@ -26,6 +26,7 @@
 #include <time.h>
 
 #include "qcom-priv.h"
+#include <ramoops_dbg.h>
 
 enum qcom_boot_source qcom_boot_source __section(".data") = 0;
 enum qcom_memmap_source qcom_memmap_source __section(".data") = 0;
@@ -86,8 +87,13 @@ int board_fdt_blob_setup(void **fdtp)
 
 	internal_fdt = (struct fdt_header *)*fdtp;
 	external_fdt = (struct fdt_header *)get_prev_bl_fdt_addr();
+	ramoops_dbg_puts("[UB-FDT] got ext\n");
 	if (external_fdt && !fdt_check_header(external_fdt)) {
-		int fixup_ret = qcom_lk2nd_fixup(external_fdt);
+		int fixup_ret;
+
+		ramoops_dbg_puts("[UB-FDT] ext hdr ok, fixup\n");
+		fixup_ret = qcom_lk2nd_fixup(external_fdt);
+		ramoops_dbg_puts("[UB-FDT] fixup done\n");
 
 		if (fixup_ret)
 			log_warning("Failed to normalize lk2nd framebuffer reservations: %d\n",
@@ -118,6 +124,7 @@ int board_fdt_blob_setup(void **fdtp)
 		ret = qcom_parse_memory(external_fdt, false);
 	}
 
+	ramoops_dbg_puts(ret < 0 ? "[UB-FDT] mem FAIL\n" : "[UB-FDT] mem ok\n");
 	if (ret < 0)
 		panic("No valid memory ranges found!\n");
 

@@ -23,6 +23,13 @@ config SPL_SYS_MALLOC_F_LEN
 config SYS_MALLOC_LEN
 	default 0x800000
 
+config QCOM_RAMOOPS_DBG
+	bool "Mirror console into lk2nd ramoops (bring-up)"
+	help
+	  Copy every console byte to a DBGC ring at 0xbffc0000 so the log
+	  survives a reset and can be fetched with lk2nd's
+	  "fastboot oem ramoops raw". Bring-up aid only.
+
 config LNX_KRNL_IMG_TEXT_OFFSET_BASE
 	default 0x80000000
 

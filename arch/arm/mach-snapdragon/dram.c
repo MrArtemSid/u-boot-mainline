@@ -6,6 +6,7 @@
 #define LOG_CATEGORY LOGC_BOARD
 #define pr_fmt(fmt) "QCOM-DRAM: " fmt
 
+#include <ramoops_dbg.h>
 #include <asm-generic/unaligned.h>
 #include <dm.h>
 #include <log.h>
@@ -155,11 +156,18 @@ static void qcom_parse_memory_dt(const fdt64_t *fdt, int *banks, phys_addr_t *ra
 
 	*ram_end = 0;
 
+	ramoops_dbg_puts("[UB-MEM] dt\n");
 	offset = fdt_path_offset(fdt, "/memory");
 	if (offset < 0)
 		return;
 
 	memory = fdt_getprop(fdt, offset, "reg", &memsize);
+	{
+		char b[96];
+
+		snprintf(b, sizeof(b), "[UB-MEM] off=%d reg=%p len=%d\n", offset, memory, memsize);
+		ramoops_dbg_puts(b);
+	}
 	if (!memory)
 		return;
 
@@ -229,11 +237,19 @@ int qcom_parse_memory(const void *fdt, bool fdt_is_internal)
 		qcom_memmap_source = QCOM_MEMMAP_SOURCE_SMEM;
 	}
 
+	{
+		char b[128];
+
+		snprintf(b, sizeof(b), "[UB-MEM] banks=%d b0=%llx+%llx end=%llx\n", banks,
+			 (u64)prevbl_ddr_banks[0].start, (u64)prevbl_ddr_banks[0].size, (u64)ram_end);
+		ramoops_dbg_puts(b);
+	}
 	/* Sort our RAM banks -_- */
 	qsort(prevbl_ddr_banks, banks, sizeof(prevbl_ddr_banks[0]), ddr_bank_cmp);
 
 	gd->ram_base = prevbl_ddr_banks[0].start;
 	gd->ram_size = ram_end - gd->ram_base;
+	ramoops_dbg_puts("[UB-MEM] sorted\n");
 
 	return 0;
 }

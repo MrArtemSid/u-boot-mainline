@@ -9,11 +9,13 @@
 #include <asm/types.h>
 #include <event.h>
 #include <hang.h>
+#include <ramoops_dbg.h>
 
 _Static_assert(EVT_COUNT < 256, "Can only support 256 event types with 8 bits");
 
 #define INITCALL(_call) \
 	do { \
+		ramoops_dbg_puts("[UB-TRACE] > " #_call "\n"); \
 		if (_call()) { \
 			printf("%s(): initcall %s() failed\n", __func__, \
 			       #_call); \
@@ -23,6 +25,7 @@ _Static_assert(EVT_COUNT < 256, "Can only support 256 event types with 8 bits");
 
 #define INITCALL_EVT(_evt) \
 	do { \
+		ramoops_dbg_puts("[UB-TRACE] event " #_evt "\n"); \
 		if (event_notify_null(_evt)) { \
 			printf("%s(): event %d/%s failed\n", __func__, _evt, \
 			       event_type_name(_evt)) ; \

@@ -13,3 +13,4 @@ obj-$(CONFIG_EFI_HAVE_CAPSULE_SUPPORT) += capsule_update.o
 endif
 
 obj-$(CONFIG_OF_LIVE) += of_fixup.o
+obj-$(CONFIG_QCOM_RAMOOPS_DBG) += ramoops_dbg.o

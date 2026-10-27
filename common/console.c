@@ -7,6 +7,7 @@
 #define LOG_CATEGORY	LOGC_CONSOLE
 
 #include <console.h>
+#include <ramoops_dbg.h>
 #include <debug_uart.h>
 #include <display_options.h>
 #include <dm.h>
@@ -722,6 +723,8 @@ void putc(const char c)
 	if (!gd)
 		return;
 
+	ramoops_dbg_putc(c);
+
 	console_record_putc(c);
 
 	/* sandbox can send characters to stdout before it has a console */
@@ -762,6 +765,8 @@ void puts(const char *s)
 {
 	if (!gd)
 		return;
+
+	ramoops_dbg_puts(s);
 
 	console_record_puts(s);
 
